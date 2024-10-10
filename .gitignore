@@ -1,3 +1,11 @@
 target
 *.pdf
+!report/Ex.pdf
 project
+
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
