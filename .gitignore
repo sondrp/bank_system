@@ -9,3 +9,7 @@ project
 *.log
 *.out
 *.synctex.gz
+
+*.bloop
+*.metals
+*.vscode
