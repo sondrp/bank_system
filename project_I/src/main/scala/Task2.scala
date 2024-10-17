@@ -19,7 +19,7 @@ def QuadraticEquation(A: Double, B: Double, C: Double): (Boolean, Option[Double]
 // From assignment 3 task 
 // Write a function fun {RightFold List Op U}, which goes through a list recursively and, through the use
 // of a combining operation Op, accumulates and returns a result. U is the neutral elements for the operation.
-def sumOFArray(arr: Array[Int]): Int = {
+def sumOFArray2(arr: Array[Int]): Int = {
   arr.foldRight(0)((x, y) => x + y)
 }
 
@@ -48,7 +48,7 @@ object Task2 {
 
     var array = Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     println(s"Array: ${array.mkString(" ")}")
-    println("Sum of Array: " + sumOFArray(array))
+    println("Sum of Array: " + sumOFArray2(array))
     println("Length of Array: " + lengthOFArray(array))
     println("\n---------------\n")
   }

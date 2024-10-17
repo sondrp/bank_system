@@ -33,7 +33,6 @@ val fibonacci: BigInt => BigInt = {
   case 0 => 0
   case 1 => 1
   case x => fibonacci(x - 1) + fibonacci(x - 2)
-
 }
 
 // Used to showcase Task 1 (when running Main.scala).
