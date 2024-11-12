@@ -49,18 +49,9 @@ class Transaction(
 
   def getStatus() = status
 
-  def setStatus(newStatus: TransactionStatus.Value) = {
-    status = newStatus
-  }
+  def setStatus(newStatus: TransactionStatus.Value) = status = newStatus
 
-  def incrementAttempts() = {
-    attempts = attempts + 1
-  }
+  def incrementAttempts() = attempts += 1
 
-  def canContinue(): Boolean = {
-    if (attempts > 2) {
-      println("Trying again")
-    }
-    attempts > 100
-  }
+  def canContinue() = attempts > 100
 }

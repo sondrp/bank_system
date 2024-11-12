@@ -21,29 +21,26 @@ class Bank(val allowedAttempts: Integer = 3) {
       .filter(t => t.getStatus() == TransactionStatus.PENDING)
       .map(processSingleTransaction)
 
-    workers.foreach(element => element.start())
-    workers.foreach(element => element.join())
+    workers.foreach(_.start)
+    workers.foreach(_.join)
 
     val succeded = transactionsPool.iterator.toList
-      .filter(t => t.getStatus() == TransactionStatus.SUCCESS)
-
-    val failed = transactionsPool.iterator.toList
-      .filter(t => t.getStatus() == TransactionStatus.FAILED)
-
-    succeded foreach { t =>
-      transactionsPool remove t
-      completedTransactions add t
-    }
-
-    failed foreach { t =>
-      if (t canContinue) {
+      .filter(_.getStatus() == TransactionStatus.SUCCESS)
+      .foreach { t =>
         transactionsPool remove t
         completedTransactions add t
-      } else {
-        t.setStatus(TransactionStatus.PENDING)
       }
+    val failed = transactionsPool.iterator.toList
+      .filter(_.getStatus() == TransactionStatus.FAILED)
+      .foreach { t =>
+        if (t canContinue) {
+          transactionsPool remove t
+          completedTransactions add t
+        } else {
+          t.setStatus(TransactionStatus.PENDING)
+        }
 
-    }
+      }
 
     if (!transactionsPool.isEmpty) {
       processTransactions
