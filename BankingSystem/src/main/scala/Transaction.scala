@@ -1,31 +1,63 @@
-import scala.collection.mutable
-
+import java.util.concurrent.atomic.AtomicReference
+import scala.collection.mutable.ArrayBuffer
 object TransactionStatus extends Enumeration {
   val SUCCESS, PENDING, FAILED = Value
 }
 
 class TransactionPool {
-  private val pool = mutable.Queue[Transaction]()
+  var transactions: AtomicReference[ArrayBuffer[Transaction]] =
+    new AtomicReference[ArrayBuffer[Transaction]](
+      ArrayBuffer.empty[Transaction]
+    )
 
-  def remove(t: Transaction): Boolean = pool.dequeueFirst(_ == t).isDefined
-  def isEmpty: Boolean = pool.isEmpty
-  def size: Integer = pool.size
-  def add(t: Transaction): Boolean = {
-    pool.enqueue(t)
-    true
+  // Remove and the transaction from the pool
+  def remove(t: Transaction) = {
+    this.synchronized {
+      val prevSize = size
+      transactions.get() -= t
+      val newSize = size
+      prevSize - newSize == 1
+    }
   }
-  def iterator: Iterator[Transaction] = pool.iterator
+
+  def isEmpty = transactions.get() isEmpty
+
+  // Check pool size
+  def size = transactions.get() size
+
+  def add(t: Transaction): Boolean = {
+    this.synchronized {
+      val prevSize = size
+      transactions.get() += t
+      val newSize = size
+      newSize - prevSize == 1
+    }
+  }
+
+  def iterator = transactions.get() iterator
 }
 
-class Transaction(val from: String, val to: String, val amount: Double, val retries: Int = 3) {
+class Transaction(
+    val from: String,
+    val to: String,
+    val amount: Double,
+    val retries: Int = 3
+) {
+
   private var status: TransactionStatus.Value = TransactionStatus.PENDING
   private var attempts = 0
 
-  def getStatus: TransactionStatus.Value = status
+  def getStatus() = status
 
-  def markSuccess(): Unit = { status = TransactionStatus.SUCCESS }
-  def markFailed(): Unit = { status = TransactionStatus.FAILED }
-  def markPending(): Unit = { status = TransactionStatus.PENDING }
-  def incrementAttempts(): Unit = { attempts += 1 }
-  def canRetry: Boolean = attempts < retries
+  def setStatus(newStatus: TransactionStatus.Value) = {
+    status = newStatus
+  }
+
+  def incrementAttempts() = {
+    attempts = attempts + 1
+  }
+
+  def canContinue(): Boolean = {
+    attempts > 15
+  }
 }
