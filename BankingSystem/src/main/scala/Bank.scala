@@ -1,4 +1,5 @@
 import collection.mutable.Map
+import java.util.UUID
 import scala.util.Random
 
 class Bank(val allowedAttempts: Integer = 3) {
@@ -20,8 +21,8 @@ class Bank(val allowedAttempts: Integer = 3) {
       .filter(t => t.getStatus() == TransactionStatus.PENDING)
       .map(processSingleTransaction)
 
-    workers.map(element => element.start())
-    workers.map(element => element.join())
+    workers.foreach(element => element.start())
+    workers.foreach(element => element.join())
 
     val succeded = transactionsPool.iterator.toList
       .filter(t => t.getStatus() == TransactionStatus.SUCCESS)
@@ -52,7 +53,7 @@ class Bank(val allowedAttempts: Integer = 3) {
   private def processSingleTransaction(t: Transaction): Thread = {
     new Thread(new Runnable {
       override def run(): Unit = {
-        t incrementAttempts
+        t.incrementAttempts()
 
         if (t.getStatus() != TransactionStatus.PENDING) return
 

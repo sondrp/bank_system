@@ -58,6 +58,9 @@ class Transaction(
   }
 
   def canContinue(): Boolean = {
-    attempts > 15
+    if (attempts > 2) {
+      println("Trying again")
+    }
+    attempts > 100
   }
 }
