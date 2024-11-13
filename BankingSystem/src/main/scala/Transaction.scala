@@ -53,5 +53,5 @@ class Transaction(
 
   def incrementAttempts() = attempts += 1
 
-  def canContinue() = attempts > 100
+  def canContinue() = attempts < retries
 }

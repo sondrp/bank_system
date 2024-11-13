@@ -1,5 +1,4 @@
 import collection.mutable.Map
-import java.util.UUID
 import scala.util.Random
 
 class Bank(val allowedAttempts: Integer = 3) {
@@ -16,34 +15,31 @@ class Bank(val allowedAttempts: Integer = 3) {
   }
 
   def processTransactions: Unit = {
+    while (processing) {
 
-    val workers = transactionsPool.iterator.toList
-      .filter(t => t.getStatus() == TransactionStatus.PENDING)
-      .map(processSingleTransaction)
+      val workers = transactionsPool.iterator.toList
+        .filter(t => t.getStatus() == TransactionStatus.PENDING)
+        .map(processSingleTransaction)
 
-    workers.foreach(_.start)
-    workers.foreach(_.join)
+      workers.foreach(_.start)
+      workers.foreach(_.join)
 
-    val succeded = transactionsPool.iterator.toList
-      .filter(_.getStatus() == TransactionStatus.SUCCESS)
-      .foreach { t =>
-        transactionsPool remove t
-        completedTransactions add t
-      }
-    val failed = transactionsPool.iterator.toList
-      .filter(_.getStatus() == TransactionStatus.FAILED)
-      .foreach { t =>
-        if (t canContinue) {
+      transactionsPool.iterator.toList
+        .filter(_.getStatus() == TransactionStatus.SUCCESS)
+        .foreach { t =>
           transactionsPool remove t
           completedTransactions add t
-        } else {
-          t.setStatus(TransactionStatus.PENDING)
         }
-
-      }
-
-    if (!transactionsPool.isEmpty) {
-      processTransactions
+      transactionsPool.iterator.toList
+        .filter(_.getStatus() == TransactionStatus.FAILED)
+        .foreach { t =>
+          if (t canContinue) {
+            t.setStatus(TransactionStatus.PENDING)
+          } else {
+            transactionsPool remove t
+            completedTransactions add t
+          }
+        }
     }
   }
 
