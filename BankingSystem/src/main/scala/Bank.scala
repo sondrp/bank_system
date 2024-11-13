@@ -15,6 +15,7 @@ class Bank(val allowedAttempts: Integer = 3) {
   }
 
   def processTransactions: Unit = {
+    Thread.sleep(1000)
     while (processing) {
 
       val workers = transactionsPool.iterator.toList
